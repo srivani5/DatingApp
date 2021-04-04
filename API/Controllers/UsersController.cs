@@ -13,6 +13,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using API.Services;
 using API.Extensions;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -32,17 +33,26 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers([FromQuery] UserParams userParams)
         {
             // return await _context.Users.ToListAsync();
             // var users = await _userRepository.GetAllUsersAsync();
             // var usersToReturn = _mapper.Map<IEnumerable<MemberDTO>>(users);
 
-            var users = await _userRepository.GetMembersAsync();
+            var username = User.GetUsername();
+            var user = await _userRepository.GetUserByUserNameAsync(username);
+            userParams.CurrentUserName = username;
+            if (string.IsNullOrEmpty(userParams.Gender))
+            {
+                userParams.Gender = user.Gender == "male" ? "female" : "male";
+            }
+            var users = await _userRepository.GetMembersAsync(userParams);
+            Response.AddPaginationHeader(users.CurrentPage, users.PageSize,
+                                            users.TotalCount, users.TotalPages);
             return Ok(users);
         }
 
-        [HttpGet("{username}", Name="GetUser")]
+        [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDTO>> GetUser(string username)
         {
             // No need of IEnumerable because we return only one value
@@ -93,9 +103,9 @@ namespace API.Controllers
 
             user.Photos.Add(photo);
 
-            if (await _userRepository.SaveChangesAsync()) 
-            { 
-                return CreatedAtRoute("GetUser", new{username = user.UserName}, _mapper.Map<PhotoDTO>(photo)); 
+            if (await _userRepository.SaveChangesAsync())
+            {
+                return CreatedAtRoute("GetUser", new { username = user.UserName }, _mapper.Map<PhotoDTO>(photo));
             }
             return BadRequest("Error adding photo");
         }
@@ -104,31 +114,31 @@ namespace API.Controllers
         [HttpPut("set-main-photo/{photoId}")]
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
-            var user =  await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+            var user = await _userRepository.GetUserByUserNameAsync(User.GetUsername());
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
-            if(photo.IsMain){return BadRequest("Already this is a main photo");}
+            if (photo.IsMain) { return BadRequest("Already this is a main photo"); }
             var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
             currentMain.IsMain = false;
             photo.IsMain = true;
 
-            if(await _userRepository.SaveChangesAsync()){return NoContent();}
+            if (await _userRepository.SaveChangesAsync()) { return NoContent(); }
             return BadRequest("Failed to set photo as main photo");
         }
 
         [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
-            var user =  await _userRepository.GetUserByUserNameAsync(User.GetUsername());
+            var user = await _userRepository.GetUserByUserNameAsync(User.GetUsername());
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
-            if(photo == null){ return NotFound("Photo Not Found"); }
-            if(photo.IsMain) { return BadRequest("Cannot delete main photo"); }
-            if(photo.PublicId != null)
+            if (photo == null) { return NotFound("Photo Not Found"); }
+            if (photo.IsMain) { return BadRequest("Cannot delete main photo"); }
+            if (photo.PublicId != null)
             {
                 var result = await _photoService.DeletePhotoAsync(photo.PublicId);
-                if(result.Error != null){ return BadRequest(result.Error.Message); }
+                if (result.Error != null) { return BadRequest(result.Error.Message); }
             }
             user.Photos.Remove(photo);
-            if(await _userRepository.SaveChangesAsync()){ return Ok();}
+            if (await _userRepository.SaveChangesAsync()) { return Ok(); }
             return BadRequest("Failed to delete photo");
         }
     }
