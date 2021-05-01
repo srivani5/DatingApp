@@ -49,7 +49,7 @@ export class ErrorInterceptor implements HttpInterceptor {
               this.router.navigateByUrl('/server-error', navigationExtras);
               break;
             default:
-              this.toastr.error('Major error');
+              this.toastr.error('Critical error occured on the server');
               console.log(error);
               break;
           }
