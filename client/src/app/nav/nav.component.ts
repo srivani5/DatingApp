@@ -28,7 +28,7 @@ export class NavComponent implements OnInit {
       this.router.navigateByUrl('/messages');
     }, error => {
       console.log('error : ', error);
-      this.toastr.error(error.error);
+      // this.toastr.error(error.error);
     });
   }
 
