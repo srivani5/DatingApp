@@ -32,7 +32,7 @@ namespace API.Controllers
             _context = context;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Member")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers([FromQuery] UserParams userParams)
         {
@@ -54,7 +54,7 @@ namespace API.Controllers
         }
 
 
-        [Authorize(Roles = "Member")]
+        [Authorize(Roles = "Admin, Member")]
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDTO>> GetUser(string username)
         {
