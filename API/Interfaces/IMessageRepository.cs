@@ -13,11 +13,12 @@ namespace API.Interfaces
         Task<Connection> GetConnection(string connectionId);
         Task<Group> GetGroupForConnection(string connectionId);
         Task<Group> GetMessageGroup(string groupName);
-         void AddMessage(Message message);
-         void DeleteMessage(Message message);
-         Task<Message> GetMessage(int id);
-         Task<PagedList<MessageDTO>> GetMessagesForUser(MessageParams messageParams);
-         Task<IEnumerable<MessageDTO>> GetMessageThread(string curentUserName, string recipientName);
-         Task<bool> SaveAllAsync();
+    void AddMessage(Message message);
+        void DeleteMessage(Message message);
+        Task<Message> GetMessage(int id);
+        Task<PagedList<MessageDTO>> GetMessagesForUser(MessageParams messageParams);
+        Task<IEnumerable<MessageDTO>> GetMessageThread(string curentUserName, string recipientName);
+        // commented for implementating of unit of work
+        //  Task<bool> SaveAllAsync();
     }
 }

@@ -68,7 +68,9 @@ namespace API.Data
 
         public Task<PagedList<MessageDTO>> GetMessagesForUser(MessageParams messageParams)
         {
-            var query = _context.Messages.OrderBy(m => m.MessageSent)
+            var query = _context.Messages
+                        .OrderByDescending(m => m.MessageSent)
+                        .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider)
                         .AsQueryable();
                             
             query = messageParams.Container switch
@@ -81,22 +83,20 @@ namespace API.Data
                 && u.DateRead == null && u.RecipientDeleted == false)
             };
 
-            var messages = query.ProjectTo<MessageDTO>(_mapper.ConfigurationProvider);
-            return PagedList<MessageDTO>.CreateAsync(messages, messageParams.PageNumber,
+            return PagedList<MessageDTO>.CreateAsync(query, messageParams.PageNumber,
                                                          messageParams.pageSize);
         }
 
         public async Task<IEnumerable<MessageDTO>> GetMessageThread(string curentUserName, string recipientName)
         {
             var messages = await _context.Messages
-                            .Include(u => u.Sender).ThenInclude(p => p.Photos)
-                            .Include(r => r.Recipient).ThenInclude(P => P.Photos)
                             .Where(u => u.Recipient.UserName == curentUserName && u.RecipientDeleted == false
                             && u.Sender.UserName == recipientName
                             || u.Recipient.UserName == recipientName && u.Sender.UserName == curentUserName
                              && u.SenderDeleted == false
                             )
                             .OrderBy(u => u.MessageSent)
+                            .ProjectTo<MessageDTO>(_mapper.ConfigurationProvider)
                             .ToListAsync();
 
             var unreadMessages = messages.Where(m => m.DateRead == null && 
@@ -110,8 +110,9 @@ namespace API.Data
                 }
             }
 
-            await _context.SaveChangesAsync();
-            return _mapper.Map<IEnumerable<MessageDTO>>(messages);
+            // not the job of repo to save changes to db, it should be implemented via unit of work
+            // await _context.SaveChangesAsync();
+            return messages;
         }
 
         public void RemoveConnection(Connection connection)
@@ -119,9 +120,10 @@ namespace API.Data
             _context.Connections.Remove(connection);
         }
 
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
+        // commented for implementating of unit of work
+        // public async Task<bool> SaveAllAsync()
+        // {
+        //     return await _context.SaveChangesAsync() > 0;
+        // }
     }
 }

@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Message } from '../_models/message';
 import { Pagination } from '../_models/pagination';
+import { ConfirmService } from '../_services/confirm.service';
 import { MessageService } from '../_services/message.service';
 
 @Component({
@@ -18,29 +19,34 @@ export class MessagesComponent implements OnInit {
   pageSize = 5;
   messagesLoading = false;
 
-  constructor(private http: HttpClient, private toastr: ToastrService, private messageService: MessageService) { }
+  constructor(private http: HttpClient, private toastr: ToastrService,
+    private messageService: MessageService, private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.loadMessages();
   }
 
-  loadMessages(){
+  loadMessages() {
     this.messagesLoading = true;
-    this.messageService.getMessages(this.pageNumber, this.pageSize, this.container).subscribe(result =>{
+    this.messageService.getMessages(this.pageNumber, this.pageSize, this.container).subscribe(result => {
       this.messages = result.result;
       this.pagination = result.pagination;
       this.messagesLoading = false;
     });
   }
 
-  pageChanged(event: any){
+  pageChanged(event: any) {
     this.pageNumber = event.page;
     this.loadMessages();
   }
 
-  deleteMessage(id){
-    this.messageService.deleteMessage(id).subscribe(res =>{
-      this.messages.splice(this.messages.findIndex(m => m.id === id), 1);
+  deleteMessage(id) {
+    this.confirmService.confirm('Confirm delete message', 'This cannot be undone').subscribe(result => {
+      if (result) {
+        this.messageService.deleteMessage(id).subscribe(res => {
+          this.messages.splice(this.messages.findIndex(m => m.id === id), 1);
+        });
+      }
     });
   }
 }

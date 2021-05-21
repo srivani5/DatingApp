@@ -40,6 +40,13 @@ namespace API.Data
                                 .ProjectTo<MemberDTO>(_mapper.ConfigurationProvider).SingleOrDefaultAsync();
         }
 
+        public Task<string> GetMemberGender(string username)
+        {
+            return _context.Users
+                    .Where(x => x.UserName == username)
+                    .Select(x => x.Gender).FirstOrDefaultAsync();
+        }
+
         public async Task<PagedList<MemberDTO>> GetMembersAsync(UserParams userParams)
         {
             // var query = _context.Users.ProjectTo<MemberDTO>(_mapper.ConfigurationProvider)
@@ -73,10 +80,11 @@ namespace API.Data
             .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
-        public async Task<bool> SaveChangesAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
+        // commented for implementating of unit of work
+        // public async Task<bool> SaveChangesAsync()
+        // {
+        //     return await _context.SaveChangesAsync() > 0;
+        // }
 
         public void Update(AppUser user)
         {
