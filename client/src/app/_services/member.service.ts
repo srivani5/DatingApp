@@ -77,6 +77,11 @@ export class MemberService {
   }
 
   getUserParams(){
+    this.accountService.currentUser.pipe(take(1)).subscribe(user => {
+      this.user = user;
+    });
+    // console.log('user ', this.user);
+    this.userParams.gender = this.user.gender === 'male' ? 'female' : 'male';
     return this.userParams;
   }
 
@@ -85,6 +90,9 @@ export class MemberService {
   }
 
   resetUserParams(){
+    this.accountService.currentUser.pipe(take(1)).subscribe(user => {
+      this.user = user;
+    });
     this.userParams = new UserParams(this.user);
     return this.userParams;
   }
