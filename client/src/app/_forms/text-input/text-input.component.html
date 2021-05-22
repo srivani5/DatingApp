@@ -9,4 +9,6 @@
     *ngIf="ngControl.control.errors?.maxlength">Maximum length is {{ngControl.control.errors.maxlength['requiredLength']}} characters</div>
     <div class="invalid-feedback" 
     *ngIf="ngControl.control.errors?.isMatching">Confirm Password should match with Password</div>
+    <div class="invalid-feedback" 
+    *ngIf="ngControl.control.errors?.hasAtleast1Num1Upper">Password should have atleast 1 numeric value & 1 upper case</div>
 </div>

@@ -33,7 +33,8 @@ export class RegisterComponent implements OnInit {
       dateOfBirth: ['', Validators.required],
       city: ['', Validators.required],
       country: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(8),
+        this.atleast1Num1Upper()]],
       confirmPassword: ['', [Validators.required, this.matchTexts('password')]]
     });
     this.registerForm.controls.password.valueChanges.subscribe(() => {
@@ -50,6 +51,17 @@ export class RegisterComponent implements OnInit {
     });
     // console.log('reg form : ', this.registerForm.value);
   }
+
+  atleast1Num1Upper () : ValidatorFn {
+    return (control: AbstractControl) => {
+      // ^(?=.*\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{6,8})$
+      if(control.value.match(/^(?=.*\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{6,8})$/)){
+        return null;
+    }else{
+      return {hasAtleast1Num1Upper:true};
+      }
+    }
+    }
 
   matchTexts(matchTo: string): ValidatorFn {
     return (control: AbstractControl) => {
