@@ -22,9 +22,9 @@ export class NavComponent implements OnInit {
   }
 
   login(): void {
-    console.log('model : ', this.model);
+    // console.log('model : ', this.model);
     this.accountService.login(this.model).subscribe(response => {
-      console.log('response : ', response);
+      // console.log('response : ', response);
       this.model.username = '';
       this.model.password = '';
       this.router.navigateByUrl('/messages');
