@@ -86,7 +86,7 @@ export class MemberDetailComponent implements OnInit, OnDestroy {
   onTabActivated(data: TabDirective) {
     this.activeTab = data;
     if (this.activeTab.heading === 'Messages' && this.messages.length === 0) {
-      // this.loadMessages();
+      // this.loadMessages(); casual code changes
       this.messageService.createHubConnection(this.user, this.member.userName)
     }else{
       this.messageService.stopHubConnection();
